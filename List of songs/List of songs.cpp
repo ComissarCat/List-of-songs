@@ -17,7 +17,8 @@ struct song
 };
 
 void menu(path path_to_songs);
-void add_song_by_hand(vector <song>& list_of_songs, int& length);
+void add_song_by_hand(path path_to_songs, vector <song>& list_of_songs, int& length);
+void add_song_by_file(path path_to_songs, vector <song>& list_of_songs, int& length);
 void delete_song();
 void edit_song();
 void search_by_author();
@@ -25,6 +26,7 @@ void search_by_word();
 void show_song(vector <song>& list_of_songs, int number);
 void save_song(path path_to_songs, vector <song>& list_of_songs, int number);
 void load_list_of_songs(path path_to_songs, vector <song>& list_of_songs, int length);
+void overwrite_save_file(path path_to_songs, vector <song>& list_of_songs);
 
 int main()
 {
@@ -43,7 +45,8 @@ int main()
     }
     else load_list_of_songs(path_to_songs, list_of_songs, length);    
     show_song(list_of_songs, 0);    
-    show_song(list_of_songs, 1);    
+    show_song(list_of_songs, 1);
+    overwrite_save_file(path_to_songs, list_of_songs);
     
     return 0;
 }
@@ -53,7 +56,7 @@ void menu(path path_to_songs)
     
 }
 
-void add_song_by_hand(vector <song>& list_of_songs, int& length)
+void add_song_by_hand(path path_to_songs, vector <song>& list_of_songs, int& length)
 {
     string name, bufer;
     int year = NULL;
@@ -73,6 +76,7 @@ void add_song_by_hand(vector <song>& list_of_songs, int& length)
     list_of_songs[length].name = name;
     list_of_songs[length].year = year;
     list_of_songs[length].text = text;
+    save_song(path_to_songs, list_of_songs, length);
     length++;
 }
 
@@ -93,15 +97,15 @@ void show_song(vector <song>& list_of_songs, int number)
 void save_song(path path_to_songs, vector <song>& list_of_songs, int number)
 {
     fstream file;
-    file.open(path_to_songs, ios::app);    
+    file.open(path_to_songs, ios::app);
+    file << "\n";
     file << list_of_songs[number].name << endl;
     file << list_of_songs[number].year << endl;
     vector<string>::iterator it;    
     for (it = list_of_songs[number].text.begin(); it != list_of_songs[number].text.end(); it++)
     {
         file << *it << endl;
-    }
-    file << "\n";
+    }    
     file.close();
 }
 
@@ -113,19 +117,38 @@ void load_list_of_songs(path path_to_songs, vector <song>& list_of_songs, int le
     {
         string name, bufer;
         int year = NULL;
-        vector <string> text;        
-        getline(file, name);        
+        vector <string> text;
+        getline(file, name);
+        if (name == "\0") getline(file, name);
         getline(file, bufer);
-        if (bufer.length()) year = (int)atof(bufer.c_str());        
+        if (bufer != "0\0") year = (int)atof(bufer.c_str());
         do
         {
             getline(file, bufer);
             if (bufer != "\0") text.push_back(bufer);
-        } while (bufer != "\0");
+        } while (bufer != "\0");        
         list_of_songs.push_back(song());
         list_of_songs[length].name = name;
         list_of_songs[length].year = year;
         list_of_songs[length].text = text;
         length++;
     }
+}
+
+void overwrite_save_file(path path_to_songs, vector <song>& list_of_songs)
+{
+    ofstream file;
+    file.open(path_to_songs);
+    file.close();
+    int length = 0;
+    vector<song>::iterator song_it;
+    for (song_it = list_of_songs.begin(); song_it != list_of_songs.end(); song_it++, length++)
+    {
+        save_song(path_to_songs, list_of_songs, length);
+    }        
+}
+
+void add_song_by_file(path path_to_songs, vector <song>& list_of_songs, int& length)
+{
+
 }
