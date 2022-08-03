@@ -24,11 +24,14 @@ void search_by_author();
 void search_by_word();
 void show_song(vector <song>& list_of_songs, int number);
 void save_song(path path_to_songs, vector <song>& list_of_songs, int number);
+void load_list_of_songs(path path_to_songs, vector <song>& list_of_songs, int length);
 
 int main()
 {
     setlocale(LC_ALL, "Russian");
 
+    int length = 0;
+    vector <song> list_of_songs;
     path path_to_songs = current_path() += "\\Songs";
     if (not exists(path_to_songs)) create_directory(path_to_songs);
     path_to_songs += "\\Songs.txt";
@@ -38,14 +41,9 @@ int main()
         file.open(path_to_songs);
         file.close();
     }
-    vector <song> list_of_songs;
-    int length = 0;
-    add_song_by_hand(list_of_songs, length);
-    show_song(list_of_songs, 0);
-    save_song(path_to_songs, list_of_songs, 0);
-    add_song_by_hand(list_of_songs, length);
-    show_song(list_of_songs, 1);
-    save_song(path_to_songs, list_of_songs, 1);
+    else load_list_of_songs(path_to_songs, list_of_songs, length);    
+    show_song(list_of_songs, 0);    
+    show_song(list_of_songs, 1);    
     
     return 0;
 }
@@ -89,6 +87,7 @@ void show_song(vector <song>& list_of_songs, int number)
     {
         cout << i << "\t" << *it << endl;
     }
+    cout << endl;
 }
 
 void save_song(path path_to_songs, vector <song>& list_of_songs, int number)
@@ -104,4 +103,29 @@ void save_song(path path_to_songs, vector <song>& list_of_songs, int number)
     }
     file << "\n";
     file.close();
+}
+
+void load_list_of_songs(path path_to_songs, vector <song>& list_of_songs, int length)
+{
+    ifstream file;
+    file.open(path_to_songs);
+    while (not file.eof())
+    {
+        string name, bufer;
+        int year = NULL;
+        vector <string> text;        
+        getline(file, name);        
+        getline(file, bufer);
+        if (bufer.length()) year = (int)atof(bufer.c_str());        
+        do
+        {
+            getline(file, bufer);
+            if (bufer != "\0") text.push_back(bufer);
+        } while (bufer != "\0");
+        list_of_songs.push_back(song());
+        list_of_songs[length].name = name;
+        list_of_songs[length].year = year;
+        list_of_songs[length].text = text;
+        length++;
+    }
 }
