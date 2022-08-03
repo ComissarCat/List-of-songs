@@ -17,13 +17,14 @@ struct song
     vector <string> text;
 };
 
-void menu(path path_to_songs);
+void menu(path path_to_songs, vector <song>& list_of_songs, int& length);
 void add_song_by_hand(path path_to_songs, vector <song>& list_of_songs, int& length);
-void add_song_by_file(vector <song>& list_of_songs, int& length);
+void add_song_by_file(path path_to_songs, vector <song>& list_of_songs, int& length);
 void delete_song();
 void edit_song();
 void search_by_author();
 void search_by_word();
+void search_by_name(vector <song>& list_of_songs);
 void show_song(vector <song>& list_of_songs, int number);
 void save_song(path path_to_songs, vector <song>& list_of_songs, int number);
 void load_list_of_songs(path path_to_songs, vector <song>& list_of_songs, int& length);
@@ -45,16 +46,12 @@ int main()
         file.close();
     }
     else load_list_of_songs(path_to_songs, list_of_songs, length);
-    //show_song(list_of_songs, 0);    
-    //show_song(list_of_songs, 1);    
-    add_song_by_file(list_of_songs, length);
-    //show_song(list_of_songs, 2);
-    overwrite_save_file(path_to_songs, list_of_songs, length);
+    search_by_name(list_of_songs);
     
     return 0;
 }
 
-void menu(path path_to_songs)
+void menu(path path_to_songs, vector <song>& list_of_songs, int& length)
 {
     
 }
@@ -158,10 +155,11 @@ void overwrite_save_file(path path_to_songs, vector <song>& list_of_songs, int& 
     }
 }
 
-void add_song_by_file(vector <song>& list_of_songs, int& length)
+void add_song_by_file(path path_to_songs, vector <song>& list_of_songs, int& length)
 {
     path path_to_song = current_path() += "\\Songs";
     string bufer;
+    ifstream file;
     cout << "Положите файл с песней в папку Songs в папке с программой. Требования к файлу: расширение .txt, пустая первая и последняя строчка,\n";
     cout << "со второй строки название песни, затем автор, затем год создания песни (0, если неизвестен), затем текст песни без пустых строк.\n";
     cout << "В одном файле может быть несколько песен, разделённых пустой строкой.\n\n";
@@ -172,9 +170,41 @@ void add_song_by_file(vector <song>& list_of_songs, int& length)
         getline(cin, bufer);
         if (bufer == "cancel\0") break;
         path_to_song += path::preferred_separator;
-        path_to_song += bufer;
-        cout << path_to_song << endl;
-        if (not exists(path_to_song)) cout << "Файл не найден, проверьте правильность ввода\n\n";
-    } while (not exists(path_to_song));
+        path_to_song += bufer;        
+        file.open(path_to_song);
+        if (!file) cout << "Файл не найден, проверьте правильность ввода\n\n";
+    } while (!file);
     if (bufer != "cancel\0") load_list_of_songs(path_to_song, list_of_songs, length);
+    overwrite_save_file(path_to_songs, list_of_songs, length);
+}
+
+void search_by_name(vector <song>& list_of_songs)
+{
+    string name, target_name, command;
+    bool found = false;
+    cout << "Введите название: ";
+    getline(cin, target_name);
+    transform(target_name.begin(), target_name.end(), target_name.begin(), ::tolower);
+    vector<song>::iterator it;
+    int number = 0;
+    for (it = list_of_songs.begin(); it != list_of_songs.end(); it++, number++)
+    {
+        name = it->name;
+        transform(name.begin(), name.end(), name.begin(), ::tolower);
+        if (name.find(target_name) != name.npos)
+        {
+            found = true;
+            show_song(list_of_songs, number);
+            break;
+        }
+    }
+    if (found)
+    {
+        do
+        {
+            cout << "Что следует сделать с записью? (edit, delete, cancel)\n";
+            getline(cin, command);
+        } while (command != "edit\0" and command != "delete\0" and command != "cancel\0");
+    }
+    else cout << "Песня с таким названием не найдена\n\n";
 }
