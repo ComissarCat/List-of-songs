@@ -23,6 +23,7 @@ void edit_song();
 void search_by_author();
 void search_by_word();
 void show_song(vector <song>& list_of_songs, int number);
+void save_song(path path_to_songs, vector <song>& list_of_songs, int number);
 
 int main()
 {
@@ -41,6 +42,10 @@ int main()
     int length = 0;
     add_song_by_hand(list_of_songs, length);
     show_song(list_of_songs, 0);
+    save_song(path_to_songs, list_of_songs, 0);
+    add_song_by_hand(list_of_songs, length);
+    show_song(list_of_songs, 1);
+    save_song(path_to_songs, list_of_songs, 1);
     
     return 0;
 }
@@ -56,7 +61,7 @@ void add_song_by_hand(vector <song>& list_of_songs, int& length)
     int year = NULL;
     vector <string> text;
     cout << "Введите название песни: ";
-    (cin >> name).get();
+    getline(cin, name);
     cout << "Введите год создания песни (если известен): ";
     getline(cin, bufer);
     if (bufer.length()) year = (int)atof(bufer.c_str());
@@ -84,4 +89,19 @@ void show_song(vector <song>& list_of_songs, int number)
     {
         cout << i << "\t" << *it << endl;
     }
+}
+
+void save_song(path path_to_songs, vector <song>& list_of_songs, int number)
+{
+    fstream file;
+    file.open(path_to_songs, ios::app);    
+    file << list_of_songs[number].name << endl;
+    file << list_of_songs[number].year << endl;
+    vector<string>::iterator it;    
+    for (it = list_of_songs[number].text.begin(); it != list_of_songs[number].text.end(); it++)
+    {
+        file << *it << endl;
+    }
+    file << "\n";
+    file.close();
 }
