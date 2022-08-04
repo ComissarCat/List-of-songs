@@ -40,6 +40,8 @@ void overwrite_save_file(path path_to_songs, vector <song>& list_of_songs);
 int main()
 {
     setlocale(LC_ALL, "Russian");
+    SetConsoleCP(1251);
+    SetConsoleOutputCP(1251);
     
     vector <song> list_of_songs;
     path path_to_songs = current_path() += "\\Songs";
