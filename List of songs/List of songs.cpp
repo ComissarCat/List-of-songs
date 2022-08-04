@@ -59,42 +59,45 @@ int main()
 }
 
 void menu(path path_to_songs, vector <song>& list_of_songs)
-{
-    system("cls");
+{    
     int command = 0;
-    cout << "\t\tМЕНЮ\n\n";
-    cout << "1. Показать все песни на экране\n";
-    cout << "2. Добавить песню вручную\n";
-    cout << "3. Добавить песню из файла\n";
-    cout << "4. Поиск по названию\n";
-    cout << "5. Поиск по автору\n";
-    cout << "6. Поиск по слову из текста\n";
-    cout << "7. Перезаписать файл сохранения\n";
-    cout << "\n0. Выход\n";
     do
     {
-        cout << "\nВведите пункт меню: ";
-        (cin >> command).get();
-    } while (command < 0 or command > 7);
-    switch (command)
-    {
-    case(0): cout << "Завершение работы...";
-        break;
-    case(1): show_all_songs(list_of_songs);
-        break;
-    case(2): add_song_by_hand(path_to_songs, list_of_songs);
-        break;
-    case(3): add_song_by_file(path_to_songs, list_of_songs);
-        break;
-    case(4): search_by_name(path_to_songs, list_of_songs);
-        break;
-    case(5): search_by_author(list_of_songs);
-        break;
-    case(6): search_by_word(list_of_songs);
-        break;
-    case(7): overwrite_save_file(path_to_songs, list_of_songs);
-        break;
-    }
+        system("cls");
+        cout << "\t\tМЕНЮ\n\n";
+        cout << "1. Показать все песни на экране\n";
+        cout << "2. Добавить песню вручную\n";
+        cout << "3. Добавить песню из файла\n";
+        cout << "4. Поиск по названию\n";
+        cout << "5. Поиск по автору\n";
+        cout << "6. Поиск по слову из текста\n";
+        cout << "7. Перезаписать файл сохранения\n";
+        cout << "\n0. Выход\n";
+        do
+        {
+            cout << "\nВведите пункт меню: ";
+            (cin >> command).get();
+        } while (command < 0 or command > 7);
+        switch (command)
+        {
+        case(0): cout << "Завершение работы...";
+            break;
+        case(1): show_all_songs(list_of_songs);
+            break;
+        case(2): add_song_by_hand(path_to_songs, list_of_songs);
+            break;
+        case(3): add_song_by_file(path_to_songs, list_of_songs);
+            break;
+        case(4): search_by_name(path_to_songs, list_of_songs);
+            break;
+        case(5): search_by_author(list_of_songs);
+            break;
+        case(6): search_by_word(list_of_songs);
+            break;
+        case(7): overwrite_save_file(path_to_songs, list_of_songs);
+            break;
+        }
+    } while (command);
 }
 
 void add_song_by_hand(path path_to_songs, vector <song>& list_of_songs)
@@ -206,8 +209,8 @@ void add_song_by_file(path path_to_songs, vector <song>& list_of_songs)
     path path_to_song = current_path() += "\\Songs";
     string bufer;
     ifstream file;
-    cout << "Положите файл с песней в папку Songs в папке с программой. Требования к файлу: расширение .txt, пустая первая и последняя строчка,\n";
-    cout << "со второй строки название песни, затем автор, затем год создания песни (0, если неизвестен), затем текст песни без пустых строк.\n";
+    cout << "Положите файл с песней в папку Songs в папке с программой. Требования к файлу: расширение .txt.\n";
+    cout << "С первой строки название песни, затем автор, затем год создания песни (0, если неизвестен), затем текст песни без пустых строк, последняя строка пустая.\n";
     cout << "В одном файле может быть несколько песен, разделённых пустой строкой.\n\n";
     do
     {
@@ -302,6 +305,7 @@ void search_by_word(vector <song>& list_of_songs)
             {
                 found = true;
                 show_song(song_it);
+                break;
             }
         }
     }
