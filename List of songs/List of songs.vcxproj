@@ -141,6 +141,9 @@
   <ItemGroup>
     <ClCompile Include="List of songs.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="add songs.h" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

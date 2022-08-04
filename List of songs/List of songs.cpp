@@ -130,6 +130,189 @@ void add_song_by_hand(path path_to_songs, vector <song>& list_of_songs)
     system("pause");
 }
 
+void add_song_by_file(path path_to_songs, vector <song>& list_of_songs)
+{
+    system("cls");
+    path path_to_song = current_path() += "\\Songs";
+    string bufer;
+    ifstream file;
+    cout << "Положите файл с песней в папку Songs в папке с программой. Требования к файлу: расширение .txt.\n";
+    cout << "С первой строки название песни, затем автор, затем год создания песни (0, если неизвестен), затем текст песни без пустых строк, последняя строка пустая.\n";
+    cout << "В одном файле может быть несколько песен, разделённых пустой строкой.\n\n";
+    do
+    {
+        path_to_song = current_path() += "\\Songs";
+        cout << "Введите название файла (cancel для выхода):\n";
+        getline(cin, bufer);
+        if (bufer == "cancel\0") break;
+        path_to_song += path::preferred_separator;
+        path_to_song += bufer;
+        file.open(path_to_song);
+        if (!file) cout << "Файл не найден, проверьте правильность ввода\n\n";
+    } while (!file);
+    if (bufer != "cancel\0") load_list_of_songs(path_to_song, list_of_songs);
+    overwrite_save_file(path_to_songs, list_of_songs);
+    cout << "\n\n";
+    system("pause");
+}
+
+void delete_song(path path_to_songs, vector <song>& list_of_songs, vector<song>::iterator it)
+{
+    list_of_songs.erase(it);
+    overwrite_save_file(path_to_songs, list_of_songs);
+}
+
+void edit_song(path path_to_songs, vector <song>& list_of_songs, vector<song>::iterator it)
+{
+    string command, bufer;
+    do
+    {
+        cout << "Что нужно изменить? (name, author, year, text, cancel)\n";
+        getline(cin, command);
+    } while (command != "name\0" and command != "author\0" and command != "year\0" and command != "text\0" and command != "cancel\0");
+    if (command == "name\0")
+    {
+        cout << "Введите название песни: ";
+        getline(cin, bufer);
+        it->name = bufer;
+        overwrite_save_file(path_to_songs, list_of_songs);
+    }
+    else if (command == "author\0")
+    {
+        cout << "Введите автора песни: ";
+        getline(cin, bufer);
+        it->author = bufer;
+        overwrite_save_file(path_to_songs, list_of_songs);
+    }
+    else if (command == "year\0")
+    {
+        int year = NULL;
+        cout << "Введите год создания песни: ";
+        getline(cin, bufer);
+        if (bufer.length()) year = (int)atof(bufer.c_str());
+        it->year = year;
+        overwrite_save_file(path_to_songs, list_of_songs);
+    }
+    else if (command == "text\0")
+    {
+        do
+        {
+            cout << "Перезаписать текст полностью или одну строчку? (all, line, cancel)\n";
+            getline(cin, command);
+        } while (command != "all\0" and command != "line\0" and command != "cancel\0");
+        if (command == "all\0")
+        {
+            vector <string> text;
+            cout << "Введите текст песни (для завершения дважды нажмите enter):\n\n";
+            do
+            {
+                getline(cin, bufer);
+                if (bufer != "\0") text.push_back(bufer);
+            } while (bufer != "\0");
+            it->text = text;
+            overwrite_save_file(path_to_songs, list_of_songs);
+        }
+        else if (command == "line\0")
+        {
+            int number = 0;
+            do
+            {
+                cout << "Какую строчку переписать? ";
+                (cin >> number).get();
+            } while (number > it->text.size() or number < 1);
+            cout << "Введите новый текст строчки:\n";
+            getline(cin, bufer);
+            it->text[number - 1] = bufer;
+            overwrite_save_file(path_to_songs, list_of_songs);
+        }
+    }
+}
+
+void search_by_name(path path_to_songs, vector <song>& list_of_songs)
+{
+    system("cls");
+    string name, target_name, command;
+    bool found = false;
+    cout << "Введите название: ";
+    getline(cin, target_name);
+    transform(target_name.begin(), target_name.end(), target_name.begin(), ::tolower);
+    vector<song>::iterator it;
+    for (it = list_of_songs.begin(); it != list_of_songs.end(); it++)
+    {
+        name = it->name;
+        transform(name.begin(), name.end(), name.begin(), ::tolower);
+        if (name.find(target_name) != name.npos)
+        {
+            found = true;
+            show_song(it);
+            break;
+        }
+    }
+    if (found)
+    {
+        do
+        {
+            cout << "Что следует сделать с записью? (edit, delete, cancel)\n";
+            getline(cin, command);
+        } while (command != "edit\0" and command != "delete\0" and command != "cancel\0");
+        if (command == "delete\0") delete_song(path_to_songs, list_of_songs, it);
+        else if (command == "edit\0") edit_song(path_to_songs, list_of_songs, it);
+    }
+    else cout << "Песня с таким названием не найдена\n\n";
+    system("pause");
+}
+
+void search_by_author(vector <song>& list_of_songs)
+{
+    system("cls");
+    string target_author, author;
+    bool found = false;
+    cout << "Введите автора: ";
+    getline(cin, target_author);
+    transform(target_author.begin(), target_author.end(), target_author.begin(), ::tolower);
+    vector<song>::iterator it;
+    for (it = list_of_songs.begin(); it != list_of_songs.end(); it++)
+    {
+        author = it->author;
+        transform(author.begin(), author.end(), author.begin(), ::tolower);
+        if (author.find(target_author) != author.npos)
+        {
+            found = true;
+            show_song(it);
+        }
+    }
+    if (not found) cout << "Песен такого автора не найдено\n\n";
+    system("pause");
+}
+
+void search_by_word(vector <song>& list_of_songs)
+{
+    system("cls");
+    string target_word, line;
+    bool found = false;
+    cout << "Введите слово: ";
+    getline(cin, target_word);
+    transform(target_word.begin(), target_word.end(), target_word.begin(), ::tolower);
+    vector<song>::iterator song_it;
+    for (song_it = list_of_songs.begin(); song_it != list_of_songs.end(); song_it++)
+    {
+        vector<string>::iterator text_it;
+        for (text_it = song_it->text.begin(); text_it != song_it->text.end(); text_it++)
+        {
+            line = *text_it;
+            transform(line.begin(), line.end(), line.begin(), ::tolower);
+            if (line.find(target_word) != line.npos)
+            {
+                found = true;
+                show_song(song_it);
+                break;
+            }
+        }
+    }
+    if (not found) cout << "Песен с таким словом не найдено\n\n";
+    system("pause");
+}
+
 void show_song(vector<song>::iterator song_it)
 {
     cout << "Название: " << song_it->name << endl;
@@ -143,6 +326,18 @@ void show_song(vector<song>::iterator song_it)
         cout << i << "\t" << *text_it << endl;
     }
     cout << endl;
+}
+
+void show_all_songs(vector <song>& list_of_songs)
+{
+    system("cls");
+    vector<song>::iterator it;
+    for (it = list_of_songs.begin(); it != list_of_songs.end(); it++)
+    {
+        show_song(it);
+    }
+    cout << "\n\n";
+    system("pause");
 }
 
 void save_song(path path_to_songs, vector<song>::iterator song_it)
@@ -201,198 +396,4 @@ void overwrite_save_file(path path_to_songs, vector <song>& list_of_songs)
     }
     cout << "Файл сохранения перезаписан\n\n";
     Sleep(1000);
-}
-
-void add_song_by_file(path path_to_songs, vector <song>& list_of_songs)
-{
-    system("cls");
-    path path_to_song = current_path() += "\\Songs";
-    string bufer;
-    ifstream file;
-    cout << "Положите файл с песней в папку Songs в папке с программой. Требования к файлу: расширение .txt.\n";
-    cout << "С первой строки название песни, затем автор, затем год создания песни (0, если неизвестен), затем текст песни без пустых строк, последняя строка пустая.\n";
-    cout << "В одном файле может быть несколько песен, разделённых пустой строкой.\n\n";
-    do
-    {
-        path_to_song = current_path() += "\\Songs";
-        cout << "Введите название файла (cancel для выхода):\n";
-        getline(cin, bufer);
-        if (bufer == "cancel\0") break;
-        path_to_song += path::preferred_separator;
-        path_to_song += bufer;        
-        file.open(path_to_song);
-        if (!file) cout << "Файл не найден, проверьте правильность ввода\n\n";
-    } while (!file);
-    if (bufer != "cancel\0") load_list_of_songs(path_to_song, list_of_songs);
-    overwrite_save_file(path_to_songs, list_of_songs);
-    cout << "\n\n";
-    system("pause");
-}
-
-void search_by_name(path path_to_songs, vector <song>& list_of_songs)
-{
-    system("cls");
-    string name, target_name, command;
-    bool found = false;
-    cout << "Введите название: ";
-    getline(cin, target_name);
-    transform(target_name.begin(), target_name.end(), target_name.begin(), ::tolower);
-    vector<song>::iterator it;
-    for (it = list_of_songs.begin(); it != list_of_songs.end(); it++)
-    {
-        name = it->name;
-        transform(name.begin(), name.end(), name.begin(), ::tolower);
-        if (name.find(target_name) != name.npos)
-        {
-            found = true;
-            show_song(it);
-            break;
-        }
-    }
-    if (found)
-    {
-        do
-        {
-            cout << "Что следует сделать с записью? (edit, delete, cancel)\n";
-            getline(cin, command);
-        } while (command != "edit\0" and command != "delete\0" and command != "cancel\0");
-        if (command == "delete\0") delete_song(path_to_songs, list_of_songs, it);
-    }
-    else cout << "Песня с таким названием не найдена\n\n";
-    system("pause");
-}
-
-void search_by_author(vector <song>& list_of_songs)
-{
-    system("cls");
-    string target_author, author;
-    bool found = false;
-    cout << "Введите автора: ";
-    getline(cin, target_author);
-    transform(target_author.begin(), target_author.end(), target_author.begin(), ::tolower);
-    vector<song>::iterator it;
-    for (it = list_of_songs.begin(); it != list_of_songs.end(); it++)
-    {
-        author = it->author;
-        transform(author.begin(), author.end(), author.begin(), ::tolower);
-        if (author.find(target_author) != author.npos)
-        {
-            found = true;
-            show_song(it);            
-        }
-    }
-    if (not found) cout << "Песен такого автора не найдено\n\n";
-    system("pause");
-}
-
-void search_by_word(vector <song>& list_of_songs)
-{
-    system("cls");
-    string target_word, line;
-    bool found = false;
-    cout << "Введите слово: ";
-    getline(cin, target_word);
-    transform(target_word.begin(), target_word.end(), target_word.begin(), ::tolower);
-    vector<song>::iterator song_it;
-    for (song_it = list_of_songs.begin(); song_it != list_of_songs.end(); song_it++)
-    {
-        vector<string>::iterator text_it;
-        for (text_it = song_it->text.begin(); text_it != song_it->text.end(); text_it++)
-        {
-            line = *text_it;
-            transform(line.begin(), line.end(), line.begin(), ::tolower);
-            if (line.find(target_word) != line.npos)
-            {
-                found = true;
-                show_song(song_it);
-                break;
-            }
-        }
-    }
-    if (not found) cout << "Песен с таким словом не найдено\n\n";
-    system("pause");
-}
-
-void delete_song(path path_to_songs, vector <song>& list_of_songs, vector<song>::iterator it)
-{
-    list_of_songs.erase(it);
-    overwrite_save_file(path_to_songs, list_of_songs);
-}
-
-void show_all_songs(vector <song>& list_of_songs)
-{
-    system("cls");
-    vector<song>::iterator it;
-    for (it = list_of_songs.begin(); it != list_of_songs.end(); it++)
-    {
-        show_song(it);
-    }
-    cout << "\n\n";
-    system("pause");
-}
-
-void edit_song(path path_to_songs, vector <song>& list_of_songs, vector<song>::iterator it)
-{
-    string command, bufer;    
-    do
-    {
-        cout << "Что нужно изменить? (name, author, year, text, cancel)\n";
-        getline(cin, command);
-    } while (command != "name\0" and command != "author\0" and command != "year\0" and command != "text\0" and command != "cancel\0");
-    if (command == "name\0")
-    {
-        cout << "Введите название песни: ";
-        getline(cin, bufer);
-        it->name = bufer;
-        overwrite_save_file(path_to_songs, list_of_songs);
-    }
-    else if (command == "author\0")
-    {
-        cout << "Введите автора песни: ";
-        getline(cin, bufer);
-        it->author = bufer;
-        overwrite_save_file(path_to_songs, list_of_songs);
-    }
-    else if (command == "year\0")
-    {
-        int year = NULL;
-        cout << "Введите год создания песни: ";        
-        getline(cin, bufer);
-        if (bufer.length()) year = (int)atof(bufer.c_str());
-        it->year = year;
-        overwrite_save_file(path_to_songs, list_of_songs);
-    }
-    else if (command == "text\0")
-    {
-        do
-        {
-            cout << "Перезаписать текст полностью или одну строчку? (all, line, cancel)\n";
-            getline(cin, command);
-        } while (command != "all\0" and command != "line\0" and command != "cancel\0");
-        if (command == "all\0")
-        {        
-            vector <string> text;
-            cout << "Введите текст песни (для завершения дважды нажмите enter):\n\n";
-            do
-            {
-                getline(cin, bufer);
-                if (bufer != "\0") text.push_back(bufer);
-            } while (bufer != "\0");
-            it->text = text;
-            overwrite_save_file(path_to_songs, list_of_songs);
-        }
-        else if (command == "line\0")
-        {
-            int number = 0;
-            do
-            {
-                cout << "Какую строчку переписать? ";
-                (cin >> number).get();
-            } while (number > it->text.size() or number < 1);
-            cout << "Введите новый текст строчки:\n";
-            getline(cin, bufer);
-            it->text[number - 1] = bufer;
-            overwrite_save_file(path_to_songs, list_of_songs);
-        }
-    }
 }
