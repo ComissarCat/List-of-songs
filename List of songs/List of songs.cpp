@@ -137,7 +137,7 @@ void add_song_by_file(path path_to_songs, vector <song>& list_of_songs)
     string bufer;
     ifstream file;
     cout << "Положите файл с песней в папку Songs в папке с программой. Требования к файлу: расширение .txt.\n";
-    cout << "С первой строки название песни, затем автор, затем год создания песни (0, если неизвестен), затем текст песни без пустых строк, последняя строка пустая.\n";
+    cout << "С первой строки название песни, затем автор, затем год создания песни (0, если неизвестен), затем текст песни без пустых строк. Последняя строчка в файле должна быть пустая.\n";
     cout << "В одном файле может быть несколько песен, разделённых пустой строкой.\n\n";
     do
     {
@@ -150,8 +150,11 @@ void add_song_by_file(path path_to_songs, vector <song>& list_of_songs)
         file.open(path_to_song);
         if (!file) cout << "Файл не найден, проверьте правильность ввода\n\n";
     } while (!file);
-    if (bufer != "cancel\0") load_list_of_songs(path_to_song, list_of_songs);
-    overwrite_save_file(path_to_songs, list_of_songs);
+    if (bufer != "cancel\0")
+    {
+        load_list_of_songs(path_to_song, list_of_songs);
+        overwrite_save_file(path_to_songs, list_of_songs);
+    }
     cout << "\n\n";
     system("pause");
 }
@@ -373,14 +376,14 @@ void load_list_of_songs(path path_to_songs, vector <song>& list_of_songs)
         do
         {
             getline(file, bufer);
-            if (bufer != "\0") text.push_back(bufer);
+            if (bufer != "\0") text.push_back(bufer);            
         } while (bufer != "\0");        
         list_of_songs.push_back(song());
         vector<song>::iterator it = list_of_songs.end() - 1;
         it->name = name;
         it->author = author;
         it->year = year;
-        it->text = text;        
+        it->text = text;
     }
 }
 
